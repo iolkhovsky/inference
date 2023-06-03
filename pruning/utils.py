@@ -1,6 +1,5 @@
 import base64
 import matplotlib
-matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import io
@@ -73,6 +72,7 @@ def save_prediction_report(images, descriptions, output_file, img_size=None, sum
 
 
 def create_graph_image(sample, image_size=(300, 600)):
+    matplotlib.use('Agg')
     height, width = image_size
     dpi = 100
     fig, ax = plt.subplots(figsize=(width / dpi, height / dpi), dpi=dpi)
@@ -87,3 +87,27 @@ def create_graph_image(sample, image_size=(300, 600)):
     plt.close(fig)
 
     return graph_image
+
+
+def plot_image_matrix(image_list, row_size):
+    num_images = len(image_list)
+    num_rows = (num_images + row_size - 1) // row_size
+
+    fig, axes = plt.subplots(num_rows, row_size, figsize=(15, 5 * num_rows))
+
+    for i, image in enumerate(image_list):
+        row = i // row_size
+        col = i % row_size
+        ax = axes[row, col] if num_rows > 1 else axes[col]
+
+        ax.imshow(image)
+        ax.axis('off')
+
+    for j in range(num_images, num_rows * row_size):
+        row = j // row_size
+        col = j % row_size
+        ax = axes[row, col] if num_rows > 1 else axes[col]
+        ax.axis('off')
+
+    plt.tight_layout()
+    plt.show()

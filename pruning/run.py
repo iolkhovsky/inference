@@ -3,14 +3,14 @@ import numpy as np
 import torch
 import torchvision
 
-from model import ResnetClassifier
+from pl_module import ImageClassifier
 from dataset import ToTensor
 from utils import (
     DummyProfiler, save_prediction_report, create_graph_image
 )
 
 
-DEFAULT_CHECKPOINT = 'logs/2023-05-2512-38-32-980233/version_0/checkpoints/epoch-0001-loss-1.628776-acc-0.875000.ckpt'
+DEFAULT_CHECKPOINT = 'logs/2023-06-0413-11-36-184494/version_0/checkpoints/epoch-0001-loss-0.000000-acc-0.531250.ckpt'
 
 
 def parse_args():
@@ -39,11 +39,15 @@ def parse_args():
         '--warmup', type=int, default=10,
         help='Amount of warmup iterations'
     )
+    parser.add_argument(
+        '--core_type', type=str, default='VitClassifier',
+        help='Amount of warmup iterations'
+    )
     return parser.parse_args()
 
 
 def run_inference(args):
-    net = ResnetClassifier.load_from_checkpoint(args.checkpoint)
+    net = ImageClassifier.load_from_checkpoint(args.checkpoint, core_type=args.core_type)
     net.freeze()
 
     print(f'Checkpoint:\n{args.checkpoint}')

@@ -70,7 +70,8 @@ class PatchEncoder(nn.Module):
 
     def forward(self, x):
         b, n = x.shape[:2]
-        assert x.shape[1:] == self._patch_shape
+        assert x.shape[1:] == self._patch_shape, \
+            f'Input shape: {x.shape}, patch shape: {self._patch_shape}'
         x = torch.reshape(x, (b, n, -1))
         embeddings = self.patch_projection(x)
         embeddings = self.pos_encoding(embeddings)

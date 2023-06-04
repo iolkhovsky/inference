@@ -31,7 +31,7 @@ class ImageClassifier(pl.LightningModule):
         self._criterion = nn.CrossEntropyLoss()
 
     @staticmethod
-    def preprocess(images_batch):
+    def preprocess(images_batch, resize=(72, 72)):
         assert len(images_batch.shape) == 4
         if isinstance(images_batch, np.ndarray):
             images_batch = torch.from_numpy(images_batch)
@@ -43,8 +43,9 @@ class ImageClassifier(pl.LightningModule):
             mean=[0.485, 0.456, 0.406],
             std=[0.229, 0.224, 0.225]
         )(images_batch)
+        if resize is not None:
+            images_batch = torchvision.transforms.Resize(resize)(images_batch)
         return images_batch
-
 
     def forward(self, images_batch):
         images_batch = ImageClassifier.preprocess(images_batch)

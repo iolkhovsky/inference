@@ -29,7 +29,7 @@ def parse_args():
         help='Validation check interval',
     )
     parser.add_argument(
-        '--core_type', default='ConvClassifier',
+        '--core_type', default='VitClassifier',
         help='Classifier core type',
     )
     parser.add_argument(

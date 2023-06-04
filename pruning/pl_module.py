@@ -4,21 +4,17 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torchvision
-import torchvision.models as models
 from typing import Any, Dict
 
+import model
 
-def get_resnet_backbone(backbone_type=None, pretrained=True):
-    if backbone_type is None:
-        backbone_type = 18
-    assert backbone_type in [18, 34, 50, 101, 152], f'Unsupported backbone: {backbone_type}'
-    model_cls = getattr(models, f'resnet{backbone_type}')
-    weights = getattr(models, f'ResNet{backbone_type}_Weights')
-    model = model_cls(weights=weights.IMAGENET1K_V1)
-    backbone = torch.nn.Sequential(
-        *list(list(model.children())[:-1])
+
+def build_core(core_type, *args, **kwargs):
+    model_cls = getattr(model, core_type)
+    return model_cls(
+        *args,
+        **kwargs,
     )
-    return backbone
 
 
 def compute_accuracy(logits, targets):
@@ -28,15 +24,10 @@ def compute_accuracy(logits, targets):
     return accuracy
 
 
-class ResnetClassifier(pl.LightningModule):
-    def __init__(self, resnet_type=None, num_classes=10, *args, **kwargs):
+class ImageClassifier(pl.LightningModule):
+    def __init__(self, core_type='ConvClassifier', num_classes=10, *args, **kwargs):
         super().__init__()
-        self._backbone = get_resnet_backbone(resnet_type)
-        self._classifier = nn.Sequential(
-            nn.AdaptiveAvgPool2d((1, 1)),
-            nn.Flatten(),
-            nn.Linear(512, num_classes),
-        )
+        self._core = build_core(core_type, num_classes=num_classes)
         self._criterion = nn.CrossEntropyLoss()
 
     @staticmethod
@@ -56,9 +47,8 @@ class ResnetClassifier(pl.LightningModule):
 
 
     def forward(self, images_batch):
-        images_batch = ResnetClassifier.preprocess(images_batch)
-        features = self._backbone(images_batch)
-        logits = self._classifier(features)
+        images_batch = ImageClassifier.preprocess(images_batch)
+        logits = self._core(images_batch)
 
         if not self.training:
             scores = torch.softmax(logits, dim=-1)

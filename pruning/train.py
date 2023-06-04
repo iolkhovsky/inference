@@ -6,7 +6,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
 from pytorch_lightning.profilers import SimpleProfiler
 
-from model import ResnetClassifier
+from pl_module import ImageClassifier
 from dataset import CIFAR10
 
 
@@ -29,8 +29,8 @@ def parse_args():
         help='Validation check interval',
     )
     parser.add_argument(
-        '--resnet_type', default=18,
-        help='Resnet backbone type',
+        '--core_type', default='ConvClassifier',
+        help='Classifier core type',
     )
     parser.add_argument(
         '--train_batch', default=64,
@@ -106,8 +106,8 @@ def run_training(args):
         reload_dataloaders_every_n_epochs=0,
         default_root_dir=None,
     )
-    model = ResnetClassifier(
-        resnet_type=args.resnet_type
+    model = ImageClassifier(
+        core_type=args.core_type,
     )
     datamodule = CIFAR10(
         train_batch=args.train_batch,
